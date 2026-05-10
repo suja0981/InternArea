@@ -11,6 +11,8 @@ const port = process.env.PORT || 5000;
 const allowedOrigins = [
     process.env.CLIENT_URL || 'http://localhost:3000',
     'https://internshala-clone-u8za.onrender.com',
+    'https://internshala-clone-wheat.vercel.app',
+    'https://intern-area-phi.vercel.app',
 ];
 app.use(cors({
     origin: function (origin, callback) {

@@ -61,6 +61,22 @@ npm run dev
 
 ---
 
+## 🔑 Admin Login Credentials
+
+> [!IMPORTANT]
+> These credentials are for **local development only** (defined in `server/.env`).
+> For the live deployment, the same values must be set as environment variables (`ADMIN_USERNAME`, `ADMIN_PASSWORD`) in the **Render dashboard**.
+
+| Field        | Value (Local Dev)                              |
+|--------------|------------------------------------------------|
+| **URL**      | https://intern-area-phi.vercel.app/adminlogin  |
+| **Username** | `AdminUser`                                    |
+| **Password** | `AdminPassword`                                |
+
+The admin panel allows managing internship/job listings and reviewing user applications.
+
+---
+
 ## 🔮 Future Improvements
 
 - Strong authentication & authorization
@@ -82,7 +98,7 @@ This project demonstrates:
 
 ## 📎 Links
 
-- 🌐 Live Demo:https://internshala-clone-wheat.vercel.app/
+- 🌐 Live Demo: https://intern-area-phi.vercel.app/
 
 ## Contact
 
