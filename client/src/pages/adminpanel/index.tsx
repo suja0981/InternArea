@@ -34,7 +34,7 @@ const index = () => {
     const fetchStats = async () => {
       try {
         const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
-        const headers = token ? { 'x-admin-token': token } : {};
+        const headers: Record<string, string> = token ? { 'x-admin-token': token } : {};
         const [appsRes, jobsRes, internshipsRes, usersRes] = await Promise.all([
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/application`),
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/job`),
