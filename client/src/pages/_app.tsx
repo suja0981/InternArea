@@ -35,7 +35,7 @@ export default function App({ Component, pageProps }: AppProps) {
           const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
           const isMobile = /Mobile|Android|iP(hone|od|ad)/i.test(ua);
           if (isMobile) {
-            const options = { timeZone: 'Asia/Kolkata', hour12: false, hour: 'numeric' };
+            const options = { timeZone: 'Asia/Kolkata', hour12: false, hour: 'numeric' } as const;
             const istHour = parseInt(new Date().toLocaleString('en-US', options), 10);
             if (istHour < 10 || istHour >= 13) {
                 auth.signOut();
