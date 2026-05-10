@@ -166,11 +166,16 @@ const index = () => {
         `${process.env.NEXT_PUBLIC_API_URL}/api/application`,
         applicationdata
       );
-      toast.success("Application submit successfully");
+      toast.success("Application submitted successfully");
       router.push("/job");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error("Failed to submit application");
+      if (error.response?.status === 403 && error.response?.data?.error === "Limit_Exceeded") {
+        toast.error(error.response.data.message);
+        router.push('/pricing');
+      } else {
+        toast.error(error.response?.data?.message || "Failed to submit application");
+      }
     }
   };
   return (
@@ -203,7 +208,7 @@ const index = () => {
           <div className="mt-4 flex items-center space-x-2">
             <Clock className="h-4 w-4 text-green-500" />
             <span className="text-green-500 text-sm">
-              Posted on {jobdata.createAt}
+              Posted on {new Date(jobdata.createdAt).toLocaleDateString()}
             </span>
           </div>
         </div>
@@ -226,7 +231,7 @@ const index = () => {
         {/* Internship Details Section */}
         <div className="p-6 border-b">
           <h2 className="text-xl font-bold text-gray-900 mb-4">
-            About the Internship
+          About the Job
           </h2>
           <p className="text-gray-600 mb-6">{jobdata.aboutJob}</p>
 
@@ -309,8 +314,8 @@ const index = () => {
                     <label key={option} className="flex items-center space-x-2">
                       <input
                         type="radio"
-                        name=""
-                        id=""
+                        name="availability"
+                        id={`job-avail-${option}`}
                         value={option}
                         checked={availability === option}
                         onChange={(e) => setAvailability(e.target.value)}

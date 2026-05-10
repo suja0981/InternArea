@@ -59,11 +59,6 @@ const index = () => {
         <p className="mt-2 text-center text-sm text-gray-600">
           Access the admin dashboard to manage internships and applications
         </p>
-        <div className="mt-4 bg-blue-50 border border-blue-200 rounded-md p-4 max-w-sm mx-auto">
-          <p className="text-sm text-blue-800 font-medium mb-1">Demo Credentials:</p>
-          <p className="text-sm text-blue-600"><strong>Username:</strong> AdminUser</p>
-          <p className="text-sm text-blue-600"><strong>Password:</strong> AdminPassword</p>
-        </div>
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">

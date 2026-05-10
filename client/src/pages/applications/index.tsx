@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 // const Applications = [
 //   {
 //     _id: "1",
@@ -49,10 +50,13 @@ const getStatusColor = (status: any) => {
   }
 };
 const index = () => {
+  const router = useRouter();
   const [searchTerm, setsearchTerm] = useState("");
   const [filter, setFilter] = useState("all");
   const [data, setdata] = useState<any>([]);
   useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
+    if (!token) { router.replace('/adminlogin'); return; }
     const fetchdata = async () => {
       try {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/application`);
@@ -62,7 +66,7 @@ const index = () => {
       }
     };
     fetchdata();
-  }, []);
+  }, [router]);
   // console.log(data);
   const filteredapplications = data.filter((application: any) => {
     const company = (application.company || "").toString();

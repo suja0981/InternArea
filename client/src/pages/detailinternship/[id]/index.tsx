@@ -92,8 +92,38 @@ const index = () => {
   const user = useSelector(selectuser)
   if (!internshipData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="max-w-4xl mx-auto px-4 py-12 relative z-0">
+        <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100 overflow-hidden mb-12 animate-pulse">
+          {/* Header Skeleton */}
+          <div className="p-8 border-b border-gray-100 bg-gray-50/50">
+            <div className="h-6 w-32 bg-gray-200 rounded-full mb-6"></div>
+            <div className="h-10 w-3/4 bg-gray-200 rounded-lg mb-4"></div>
+            <div className="h-6 w-1/2 bg-gray-200 rounded-lg mb-8"></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <div className="h-16 bg-gray-200 rounded-xl"></div>
+              <div className="h-16 bg-gray-200 rounded-xl"></div>
+              <div className="h-16 bg-gray-200 rounded-xl"></div>
+            </div>
+            <div className="h-6 w-48 bg-gray-200 rounded-lg"></div>
+          </div>
+          {/* Content Skeletons */}
+          <div className="p-8 border-b border-gray-100">
+            <div className="h-8 w-48 bg-gray-200 rounded-lg mb-6"></div>
+            <div className="space-y-3">
+              <div className="h-4 bg-gray-200 rounded w-full"></div>
+              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+              <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+            </div>
+          </div>
+          <div className="p-8">
+            <div className="h-8 w-64 bg-gray-200 rounded-lg mb-6"></div>
+            <div className="space-y-3 mb-8">
+              <div className="h-4 bg-gray-200 rounded w-full"></div>
+              <div className="h-4 bg-gray-200 rounded w-full"></div>
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -129,85 +159,87 @@ const index = () => {
     }
   }
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div className="max-w-4xl mx-auto px-4 py-12 relative z-0">
+      <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100 overflow-hidden mb-12 animate-fade-in-up">
         {/* Header Section */}
-        <div className="p-6 border-b">
-          <div className="flex items-center space-x-2 text-blue-600 mb-4">
+        <div className="p-8 border-b border-gray-100 bg-gradient-to-b from-primary-50/50 to-white">
+          <div className="flex items-center space-x-2 text-primary-600 mb-4 bg-primary-100/50 w-fit px-3 py-1.5 rounded-full text-sm font-semibold">
             <ArrowUpRight className="h-5 w-5" />
-            <span className="font-medium">Actively Hiring</span>
+            <span>Actively Hiring</span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-4xl font-extrabold text-gray-900 mb-2 tracking-tight">
             {internshipData.title}
           </h1>
-          <p className="text-lg text-gray-600 mb-4">{internshipData.company}</p>
+          <p className="text-xl text-gray-500 font-medium mb-6">{internshipData.company}</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="flex items-center space-x-2 text-gray-600">
-              <MapPin className="h-5 w-5" />
-              <span>{internshipData.location}</span>
+            <div className="flex items-center space-x-3 text-gray-600 bg-gray-50 p-4 rounded-xl">
+              <div className="p-2 bg-white rounded-lg shadow-sm"><MapPin className="h-5 w-5 text-primary-500" /></div>
+              <span className="font-medium">{internshipData.location}</span>
             </div>
-            <div className="flex items-center space-x-2 text-gray-600">
-              <DollarSign className="h-5 w-5" />
-              <span>{internshipData.stipend}</span>
+            <div className="flex items-center space-x-3 text-gray-600 bg-gray-50 p-4 rounded-xl">
+              <div className="p-2 bg-white rounded-lg shadow-sm"><DollarSign className="h-5 w-5 text-green-500" /></div>
+              <span className="font-medium">{internshipData.stipend}</span>
             </div>
-            <div className="flex items-center space-x-2 text-gray-600">
-              <Calendar className="h-5 w-5" />
-              <span>{internshipData.startDate}</span>
+            <div className="flex items-center space-x-3 text-gray-600 bg-gray-50 p-4 rounded-xl">
+              <div className="p-2 bg-white rounded-lg shadow-sm"><Calendar className="h-5 w-5 text-orange-500" /></div>
+              <span className="font-medium">{internshipData.startDate}</span>
             </div>
           </div>
-          <div className="mt-4 flex items-center space-x-2">
-            <Clock className="h-4 w-4 text-green-500" />
-            <span className="text-green-500 text-sm">
+          <div className="mt-6 flex items-center space-x-2 bg-green-50 w-fit px-3 py-1.5 rounded-lg">
+            <Clock className="h-4 w-4 text-green-600" />
+            <span className="text-green-600 text-sm font-medium">
               Posted on {internshipData.createdAt}
             </span>
           </div>
         </div>
         {/* Company Section */}
-        <div className="p-6 border-b">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">
+        <div className="p-8 border-b border-gray-100">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
             About {internshipData.company}
           </h2>
           <div className="flex items-center space-x-2 mb-4">
             <a
               href="#"
-              className="text-blue-600 hover:text-blue-700 flex items-center space-x-1"
+              className="text-primary-600 hover:text-primary-700 flex items-center space-x-1 font-medium group"
             >
               <span>Visit company website</span>
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </a>
           </div>
-          <p className="text-gray-600">{internshipData.aboutCompany}</p>
+          <p className="text-gray-600 leading-relaxed">{internshipData.aboutCompany}</p>
         </div>
         {/* Internship Details Section */}
-        <div className="p-6 border-b">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">
+        <div className="p-8 border-b border-gray-100">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
             About the Internship
           </h2>
-          <p className="text-gray-600 mb-6">{internshipData.aboutInternship}</p>
+          <p className="text-gray-600 mb-8 leading-relaxed">{internshipData.aboutInternship}</p>
 
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <h3 className="text-lg font-bold text-gray-900 mb-3">
             Who can apply
           </h3>
-          <p className="text-gray-600 mb-6">{internshipData.whoCanApply}</p>
+          <p className="text-gray-600 mb-8 leading-relaxed bg-gray-50 p-4 rounded-xl">{internshipData.whoCanApply}</p>
 
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Perks</h3>
-          <p className="text-gray-600 mb-6">{internshipData.perks}</p>
+          <h3 className="text-lg font-bold text-gray-900 mb-3">Perks</h3>
+          <p className="text-gray-600 mb-8 leading-relaxed flex items-center gap-2">
+            <span className="px-3 py-1.5 bg-primary-50 text-primary-700 rounded-lg text-sm font-medium">{internshipData.perks}</span>
+          </p>
 
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <h3 className="text-lg font-bold text-gray-900 mb-3">
             Additional Information
           </h3>
-          <p className="text-gray-600 mb-6">{internshipData.additionalInfo}</p>
+          <p className="text-gray-600 mb-8 leading-relaxed">{internshipData.additionalInfo}</p>
 
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <h3 className="text-lg font-bold text-gray-900 mb-3">
             Number of Openings
           </h3>
-          <p className="text-gray-600">{internshipData.numberOfOpening}</p>
+          <p className="text-gray-600 font-medium">{internshipData.numberOfOpening}</p>
         </div>
         {/* Apply Button */}
-        <div className="p-6 flex justify-center">
+        <div className="p-8 flex justify-center bg-gray-50">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition duration-150"
+            className="bg-primary-600 text-white px-10 py-3.5 rounded-xl hover:bg-primary-700 transition-all duration-300 font-bold shadow-[0_4px_14px_0_rgba(79,70,229,0.39)] hover:shadow-[0_6px_20px_rgba(79,70,229,0.23)] hover:-translate-y-0.5 text-lg w-full md:w-auto"
           >
             Apply Now
           </button>
@@ -216,80 +248,80 @@ const index = () => {
       {/* Apply Modal */}
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="bg-white/95 backdrop-blur-xl border border-white/50 shadow-2xl rounded-3xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto animate-fade-in-up">
+            <div className="p-6 border-b border-gray-100/50 sticky top-0 bg-white/80 backdrop-blur-md z-10">
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">
                   Apply to {internshipData.company}
                 </h2>
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-full transition-colors"
                 >
                   <X className="h-6 w-6" />
                 </button>
               </div>
             </div>
-            <div className="p-6 space-y-6">
+            <div className="p-8 space-y-8">
               {/* Resume Section */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <div className="bg-primary-50 p-6 rounded-2xl border border-primary-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
                   Your Resume
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-primary-700 font-medium">
                   Your current resume will be submitted with the application
                 </p>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
                   Cover Letter
                 </h3>
-                <p className="text-gray-600 mb-2">
+                <p className="text-gray-500 mb-4 text-sm font-medium">
                   Why should you be selected for this internship?
                 </p>
                 <textarea
                   value={coverLetter}
                   onChange={(e) => setCoverLetter(e.target.value)}
-                  className="w-full h-32 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                  className="w-full h-40 p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-800 resize-none transition-shadow"
                   placeholder="Write your cover letter here..."
                 ></textarea>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">
                   Your Availability
                 </h3>
-                <div className="space-y-3">
-                  {[
-                    "Yes, I am available to join immediately",
-                    "No, I am currently on notice period",
-                    "No, I will have to serve notice period",
-                    "Other",
-                  ].map((option) => (
-                    <label key={option} className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        name=""
-                        id=""
-                        value={option}
-                        checked={availability === option}
-                        onChange={(e) => setAvailability(e.target.value)}
-                        className="h-4 w-4 text-blue-600"
-                      />
-                      <span className="text-gray-700">{option}</span>
-                    </label>
-                  ))}
+                <div className="space-y-4">
+                    {[
+                        "Yes, I am available to join immediately",
+                        "No, I am currently on notice period",
+                        "No, I will have to serve notice period",
+                        "Other",
+                      ].map((option) => (
+                        <label key={option} className="flex items-start space-x-3 cursor-pointer group">
+                          <input
+                            type="radio"
+                            name="availability"
+                            id={`avail-${option}`}
+                            value={option}
+                            checked={availability === option}
+                            onChange={(e) => setAvailability(e.target.value)}
+                            className="mt-1 h-4 w-4 text-primary-600 border-gray-300 focus:ring-primary-500"
+                          />
+                          <span className="text-gray-700 font-medium group-hover:text-gray-900 transition-colors">{option}</span>
+                        </label>
+                      ))}
                 </div>
               </div>
-              <div className="flex justify-end pt-4">
+              <div className="flex justify-end pt-6 border-t border-gray-100">
                 {user ? (
-                  <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700" onClick={handlesubmitapplication}>
+                  <button className="bg-primary-600 text-white px-8 py-3 rounded-xl hover:bg-primary-700 transition-all font-bold shadow-[0_4px_14px_0_rgba(79,70,229,0.39)] hover:shadow-[0_6px_20px_rgba(79,70,229,0.23)] hover:-translate-y-0.5" onClick={handlesubmitapplication}>
                     Submit Application
                   </button>
                 ) : (
                   <Link
                     href={`/`}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+                    className="bg-primary-600 text-white px-8 py-3 rounded-xl hover:bg-primary-700 transition-all font-bold shadow-md"
                   >
                     Sign up to apply
                   </Link>

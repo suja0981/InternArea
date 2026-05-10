@@ -88,22 +88,22 @@ export default function SvgSlider() {
     {
       pattern: "pattern-1",
       title: "Start Your Career Journey",
-      bgColor: "bg-indigo-600",
+      bgColor: "bg-gradient-to-r from-primary-600 to-indigo-600",
     },
     {
       pattern: "pattern-2",
       title: "Learn From The Best",
-      bgColor: "bg-blue-600",
+      bgColor: "bg-gradient-to-r from-blue-600 to-cyan-600",
     },
     {
       pattern: "pattern-3",
       title: "Grow Your Skills",
-      bgColor: "bg-purple-600",
+      bgColor: "bg-gradient-to-r from-purple-600 to-pink-600",
     },
     {
       pattern: "pattern-4",
       title: "Connect With Top Companies",
-      bgColor: "bg-teal-600",
+      bgColor: "bg-gradient-to-r from-teal-500 to-emerald-600",
     },
   ];
 
@@ -146,13 +146,16 @@ export default function SvgSlider() {
     (item: any) => !selectedCategory || item.category === selectedCategory
   );
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-0">
+      {/* Background Gradient Blob */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary-200/40 rounded-full blur-[100px] -z-10 pointer-events-none" />
+      
       {/* hero section */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+      <div className="text-center mb-16 animate-fade-in-up">
+        <h1 className="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-primary-700 mb-6 tracking-tight">
           Make your dream career a reality
         </h1>
-        <p className="text-xl text-gray-600">Trending on InternArea 🔥</p>
+        <p className="text-xl text-gray-500 font-medium">Trending on InternArea 🔥</p>
       </div>
       {/* Swiper section */}
       <div className="mb-16">
@@ -228,9 +231,9 @@ export default function SvgSlider() {
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-full transition-colors ${selectedCategory === category
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${selectedCategory === category
+                ? "bg-primary-600 text-white shadow-md shadow-primary-600/30 -translate-y-0.5"
+                : "bg-white text-gray-600 hover:bg-primary-50 hover:text-primary-600 border border-gray-200"
                 }`}
             >
               {category}
@@ -239,44 +242,44 @@ export default function SvgSlider() {
         </div>
       </div>
       {/* INternship grid   */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
         {filteredInternships.map((internship: any, index: any) => (
           <div
             key={index}
-            className="bg-white rounded-lg shadow-md p-6 transition-transform hover:transform hover:scale-105"
+            className="group bg-white rounded-2xl border border-gray-100 p-7 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex flex-col h-full"
           >
-            <div className="flex items-center gap-2 text-blue-600 mb-4">
-              <ArrowUpRight size={20} />
-              <span className="font-medium">Actively Hiring</span>
+            <div className="flex items-center gap-2 text-primary-600 mb-5 bg-primary-50 w-fit px-3 py-1.5 rounded-full text-sm font-medium">
+              <ArrowUpRight size={16} />
+              <span>Actively Hiring</span>
             </div>
-            <h3 className="text-lg font-semibold mb-2 text-gray-800">
+            <h3 className="text-xl font-bold mb-2 text-gray-900 group-hover:text-primary-600 transition-colors">
               {internship.title}
             </h3>
-            <p className="text-gray-500 mb-4">{internship.company}</p>
-            <div className="space-y-3 text-gray-600">
-              <div className="flex items-center gap-2">
-                <MapPin size={18} />
-                <span>{internship.location}</span>
+            <p className="text-gray-500 mb-6 font-medium">{internship.company}</p>
+            <div className="space-y-4 text-gray-600 mb-8 flex-1">
+              <div className="flex items-center gap-3">
+                <MapPin size={18} className="text-gray-400 group-hover:text-primary-500 transition-colors" />
+                <span className="font-medium">{internship.location}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Banknote size={18} />
-                <span>{internship.stipend}</span>
+              <div className="flex items-center gap-3">
+                <Banknote size={18} className="text-gray-400 group-hover:text-green-500 transition-colors" />
+                <span className="font-medium">{internship.stipend}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Calendar size={18} />
-                <span>{internship.duration}</span>
+              <div className="flex items-center gap-3">
+                <Calendar size={18} className="text-gray-400 group-hover:text-orange-500 transition-colors" />
+                <span className="font-medium">{internship.duration}</span>
               </div>
             </div>
-            <div className="flex items-center justify-between mt-6">
-              <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
+            <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+              <span className="px-3 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold uppercase tracking-wider">
                 Internship
               </span>
               <Link
                 href={`/detailinternship/${internship._id}`}
-                className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                className="text-primary-600 hover:text-primary-700 flex items-center gap-1 font-semibold group/link"
               >
                 View details
-                <ChevronRight size={16} />
+                <ChevronRight size={16} className="transition-transform group-hover/link:translate-x-1" />
               </Link>
             </div>
           </div>
@@ -285,44 +288,44 @@ export default function SvgSlider() {
       {/* Jobs grid   */}
       <div className="mb-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Latest Jobs</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
           {filteredJobs.map((job: any, index: any) => (
             <div
               key={index}
-              className="bg-white rounded-lg shadow-md p-6 transition-transform hover:transform hover:scale-105"
+              className="group bg-white rounded-2xl border border-gray-100 p-7 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex flex-col h-full"
             >
-              <div className="flex items-center gap-2 text-blue-600 mb-4">
-                <ArrowUpRight size={20} />
-                <span className="font-medium">Actively Hiring</span>
+              <div className="flex items-center gap-2 text-primary-600 mb-5 bg-primary-50 w-fit px-3 py-1.5 rounded-full text-sm font-medium">
+                <ArrowUpRight size={16} />
+                <span>Actively Hiring</span>
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-800">
+              <h3 className="text-xl font-bold mb-2 text-gray-900 group-hover:text-primary-600 transition-colors">
                 {job.title}
               </h3>
-              <p className="text-gray-500 mb-4">{job.company}</p>
-              <div className="space-y-3 text-gray-600">
-                <div className="flex items-center gap-2">
-                  <MapPin size={18} />
-                  <span>{job.location}</span>
+              <p className="text-gray-500 mb-6 font-medium">{job.company}</p>
+              <div className="space-y-4 text-gray-600 mb-8 flex-1">
+                <div className="flex items-center gap-3">
+                  <MapPin size={18} className="text-gray-400 group-hover:text-primary-500 transition-colors" />
+                  <span className="font-medium">{job.location}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Banknote size={18} />
-                  <span>{job.CTC}</span>
+                <div className="flex items-center gap-3">
+                  <Banknote size={18} className="text-gray-400 group-hover:text-green-500 transition-colors" />
+                  <span className="font-medium">{job.CTC}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Calendar size={18} />
-                  <span>{job.Experience}</span>
+                <div className="flex items-center gap-3">
+                  <Calendar size={18} className="text-gray-400 group-hover:text-orange-500 transition-colors" />
+                  <span className="font-medium">{job.Experience}</span>
                 </div>
               </div>
-              <div className="flex items-center justify-between mt-6">
-                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
+              <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+                <span className="px-3 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold uppercase tracking-wider">
                   Jobs
                 </span>
                 <Link
                   href={`/detailjob/${job._id}`}
-                  className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                  className="text-primary-600 hover:text-primary-700 flex items-center gap-1 font-semibold group/link"
                 >
                   View details
-                  <ChevronRight size={16} />
+                  <ChevronRight size={16} className="transition-transform group-hover/link:translate-x-1" />
                 </Link>
               </div>
             </div>
@@ -330,14 +333,17 @@ export default function SvgSlider() {
         </div>
       </div>
       {/* Stat Section  */}
-      <div className="bg-white rounded-xl shadow-lg p-8 mb-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 p-10 mb-20 relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 via-purple-500 to-pink-500" />
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 relative z-10">
           {stats.map((stat, index) => (
-            <div key={index} className="text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">
+            <div key={index} className="text-center group">
+              <div className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-primary-600 to-indigo-600 mb-3 group-hover:scale-110 transition-transform duration-300">
                 {stat.number}
               </div>
-              <div className="text-gray-600">{stat.label}</div>
+              <div className="text-gray-500 font-medium uppercase text-xs tracking-widest">{stat.label}</div>
             </div>
           ))}
         </div>

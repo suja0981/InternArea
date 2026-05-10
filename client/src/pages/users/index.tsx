@@ -2,16 +2,23 @@ import axios from "axios";
 import { Users, Search, Mail, Shield, User as UserIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 const AdminUsers = () => {
+  const router = useRouter();
   const [users, setUsers] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
+    if (!token) { router.replace('/adminlogin'); return; }
+
     const fetchUsers = async () => {
       try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users`);
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users`, {
+          headers: { 'x-admin-token': token }
+        });
         setUsers(res.data);
       } catch (error) {
         console.error("Failed to fetch users", error);
@@ -21,7 +28,7 @@ const AdminUsers = () => {
       }
     };
     fetchUsers();
-  }, []);
+  }, [router]);
 
   const filteredUsers = users.filter((user: any) => {
     const term = searchTerm.toLowerCase();

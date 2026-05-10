@@ -22,6 +22,12 @@ const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString()
 // 1. Send OTP
 router.post('/send-otp', async (req, res) => {
     try {
+        if (!isWithinPaymentWindow()) {
+            return res.status(403).json({ 
+                error: 'Payments and Resume generation are only allowed between 10:00 AM and 11:00 AM IST.' 
+            });
+        }
+
         const { uid } = req.body;
         if (!uid) return res.status(400).json({ error: 'UID is required' });
 
@@ -34,6 +40,7 @@ router.post('/send-otp', async (req, res) => {
 
         const otp = generateOTP();
         user.currentOtp = otp;
+        user.otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
         await user.save();
 
         // Simulate sending email
@@ -66,8 +73,16 @@ router.post('/verify-and-order', async (req, res) => {
             return res.status(400).json({ error: 'Invalid OTP or expired session.' });
         }
 
+        if (!user.otpExpiry || new Date() > user.otpExpiry) {
+            user.currentOtp = undefined;
+            user.otpExpiry = undefined;
+            await user.save();
+            return res.status(400).json({ error: 'OTP has expired. Please request a new one.' });
+        }
+
         // Clear OTP after successful verification
         user.currentOtp = undefined;
+        user.otpExpiry = undefined;
         await user.save();
 
         // Create Razorpay Order for ₹50
@@ -95,7 +110,19 @@ router.post('/verify-payment', async (req, res) => {
         }
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, uid, resumeData } = req.body;
 
-        // Trusting dummy test signature
+        // ── Signature Verification ──────────────────────────────────────────
+        const crypto = require('crypto');
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSignature = crypto
+            .createHmac('sha256', process.env.RAZORPAY_SECRET)
+            .update(body)
+            .digest('hex');
+        
+        if (expectedSignature !== razorpay_signature) {
+            return res.status(400).json({ error: 'Payment signature verification failed. Possible tampering detected.' });
+        }
+        // ────────────────────────────────────────────────────────────────────
+
         // Create Resume
         const newResume = new Resume({
             uid,
@@ -105,6 +132,7 @@ router.post('/verify-payment', async (req, res) => {
 
         // Link to User
         const user = await User.findOne({ uid });
+        if (!user) return res.status(404).json({ error: 'User not found' });
         user.resumeId = newResume._id;
         await user.save();
 

@@ -1,10 +1,19 @@
-import React from "react";
-import { Settings, Save, Shield, Bell, Key } from "lucide-react";
+import React, { useEffect } from "react";
+import { Settings, Save, Shield, Bell } from "lucide-react";
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 const AdminSettings = () => {
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
+    if (!token) router.replace('/adminlogin');
+  }, [router]);
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+    // In a real app, POST the settings to the server
     toast.success("Settings saved successfully");
   };
 

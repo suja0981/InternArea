@@ -4,9 +4,30 @@ import { toast } from 'react-toastify';
 import { auth, storage } from '../../firebase/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { FileText, Upload, Lock, Briefcase, GraduationCap, User as UserIcon, Check } from 'lucide-react';
+import { FileText, Upload, Lock, Briefcase, GraduationCap, User as UserIcon, Check, AlertTriangle, Clock } from 'lucide-react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+
+// Compute how many minutes until the 10 AM IST window opens
+function getMinutesUntilWindow(): number {
+  const now = new Date();
+  const ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+  const h = ist.getHours();
+  const m = ist.getMinutes();
+
+  if (h === 10) return 0; // currently open
+  let minutesUntil = ((10 - h - 1) * 60) + (60 - m);
+  if (minutesUntil < 0) minutesUntil += 24 * 60; // next day
+  return minutesUntil;
+}
+
+function formatCountdown(minutes: number): string {
+  if (minutes <= 0) return 'now';
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
 
 export default function ResumeBuilder() {
     const router = useRouter();
@@ -14,6 +35,8 @@ export default function ResumeBuilder() {
     const [dbUser, setDbUser] = useState<any>(null);
     const [step, setStep] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
+    const [isTimeValid, setIsTimeValid] = useState(false);
+    const [minutesUntil, setMinutesUntil] = useState(0);
 
     // Form Data
     const [formData, setFormData] = useState({
@@ -58,7 +81,20 @@ export default function ResumeBuilder() {
                 router.push('/');
             }
         });
-        return () => unsubscribe();
+
+        // Time check logic
+        const updateTime = () => {
+            const mins = getMinutesUntilWindow();
+            setIsTimeValid(mins === 0);
+            setMinutesUntil(mins);
+        };
+        updateTime();
+        const interval = setInterval(updateTime, 30000);
+
+        return () => {
+            unsubscribe();
+            clearInterval(interval);
+        };
     }, [router]);
 
     if (!dbUser) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div></div>;
@@ -94,6 +130,10 @@ export default function ResumeBuilder() {
 
     const handleGenerateOTP = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!isTimeValid) {
+            toast.error("Resume generation is only available between 10:00 AM and 11:00 AM IST.");
+            return;
+        }
         setIsLoading(true);
         try {
             const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/resume/send-otp`, { uid: user.uid });
@@ -109,17 +149,29 @@ export default function ResumeBuilder() {
     const handleVerifyAndPay = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!otp) return toast.error("Enter OTP");
+        if (!isTimeValid) return toast.error("Payment window is closed.");
+        
         setIsLoading(true);
 
         try {
+            // 1. Verify OTP & Order
             const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/resume/verify-and-order`, { 
                 uid: user.uid, 
                 otp 
             });
             const { order } = res.data;
 
+            // 2. Upload Photo FIRST before payment to prevent payment loss on upload fail
+            let photoUrl = '';
+            if (photoFile) {
+                toast.info("Uploading photo, please wait...");
+                const storageRef = ref(storage, `resumes/${user.uid}/${Date.now()}_${photoFile.name}`);
+                await uploadBytes(storageRef, photoFile);
+                photoUrl = await getDownloadURL(storageRef);
+            }
+
             const options = {
-                key: 'rzp_test_1234567890abcd',
+                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
                 amount: order.amount,
                 currency: order.currency,
                 name: 'Intern Area',
@@ -127,13 +179,6 @@ export default function ResumeBuilder() {
                 order_id: order.id,
                 handler: async function (response: any) {
                     try {
-                        let photoUrl = '';
-                        if (photoFile) {
-                            const storageRef = ref(storage, `resumes/${user.uid}/${Date.now()}_${photoFile.name}`);
-                            await uploadBytes(storageRef, photoFile);
-                            photoUrl = await getDownloadURL(storageRef);
-                        }
-
                         const verifyRes = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/resume/verify-payment`, {
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_payment_id: response.razorpay_payment_id,
@@ -146,20 +191,23 @@ export default function ResumeBuilder() {
                         setExistingResume(verifyRes.data.resume);
                         setStep(5);
                     } catch (err: any) {
-                        toast.error(err.response?.data?.error || "Error generating resume");
+                        toast.error(err.response?.data?.error || "Error saving resume to database. Please contact support.");
                     }
                 },
                 prefill: {
                     name: formData.fullName || user.displayName || 'User',
                     email: formData.email || user.email || 'user@example.com'
                 },
-                theme: { color: '#2563EB' }
+                theme: { color: '#2563EB' },
+                modal: {
+                    ondismiss: () => toast.info('Payment cancelled.')
+                }
             };
 
             const rzp = new (window as any).Razorpay(options);
             rzp.open();
         } catch (error: any) {
-            toast.error(error.response?.data?.error || "Invalid OTP");
+            toast.error(error.response?.data?.error || "Verification or Upload failed");
         } finally {
             setIsLoading(false);
         }
@@ -173,8 +221,21 @@ export default function ResumeBuilder() {
 
             {step < 5 && (
                 <div className="text-center mb-10">
-                    <h1 className="text-3xl font-extrabold text-gray-900">Professional Resume Builder</h1>
-                    <p className="mt-2 text-gray-600">Enter your details to generate a stunning resume instantly. Fee: ₹50</p>
+                    <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Professional Resume Builder</h1>
+                    <p className="mt-2 text-gray-600 mb-6">Enter your details to generate a stunning resume instantly. Fee: ₹50</p>
+                    
+                    {!isTimeValid && (
+                        <div className="inline-flex flex-col sm:flex-row items-center gap-3 bg-amber-50 border border-amber-300 text-amber-800 px-6 py-4 rounded-xl text-sm font-medium shadow-sm mb-4">
+                            <div className="flex items-center gap-2">
+                                <AlertTriangle size={18} className="text-amber-500 flex-shrink-0" />
+                                <span>Payments are only available <strong>10:00 AM – 11:00 AM IST</strong></span>
+                            </div>
+                            <div className="flex items-center gap-2 bg-amber-100 px-3 py-1 rounded-lg">
+                                <Clock size={14} />
+                                <span>Opens in ~{formatCountdown(minutesUntil)}</span>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 

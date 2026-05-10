@@ -12,34 +12,9 @@ import Link from "next/link";
 import axios from "axios";
 import { selectuser } from "@/Feature/Userslice";
 import { useSelector } from "react-redux";
-const Applications = [
-  {
-    _id: "1",
-    company: "Tech Corp",
-    category: "Software",
-    user: { name: "John Doe", email: "john@example.com" },
-    createAt: "2024-03-10T12:00:00Z",
-    status: "approved",
-  },
-  {
-    _id: "2",
-    company: "Health Solutions",
-    category: "Healthcare",
-    user: { name: "Rahul", email: "jane@example.com" },
-    createAt: "2024-03-08T10:30:00Z",
-    status: "pending",
-  },
-  {
-    _id: "3",
-    company: "EduLearn",
-    category: "Education",
-    user: { name: "Rahul", email: "alice@example.com" },
-    createAt: "2024-03-05T09:15:00Z",
-    status: "rejected",
-  },
-];
 const getStatusColor = (status: any) => {
-  switch (status.toLowerCase()) {
+  const s = (status || "").toString().toLowerCase();
+  switch (s) {
     case "approved":
       return "bg-green-100 text-green-800";
     case "rejected":
@@ -48,6 +23,7 @@ const getStatusColor = (status: any) => {
       return "bg-yellow-100 text-yellow-800";
   }
 };
+
 const index = () => {
   const [searchTerm, setsearchTerm] = useState("");
   const [filter, setFilter] = useState("all");
@@ -90,7 +66,7 @@ const index = () => {
           <div className="border-b border-gray-200 px-6 py-4">
             <h1 className="text-2xl font-bold text-gray-900">My Applications</h1>
             <p className="mt-1 text-sm text-gray-500">
-              Track and manage your job and intenrhsip applications
+              Track and manage your job and internship applications
             </p>
           </div>
 
@@ -181,6 +157,17 @@ const index = () => {
                 </tr>
               </thead>
               <tbody>
+                {filteredapplications.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-12 text-center text-gray-500">
+                      <div className="flex flex-col items-center gap-2">
+                        <Mail className="h-10 w-10 text-gray-300" />
+                        <p className="font-medium">No applications found</p>
+                        <p className="text-sm">Apply to internships to see them here.</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
                 {filteredapplications.map((application: any) => (
                   <tr key={application._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">

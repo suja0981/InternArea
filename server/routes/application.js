@@ -19,6 +19,15 @@ router.post("/", async (req, res) => {
     const planLimits = { 'Free': 1, 'Bronze': 3, 'Silver': 5, 'Gold': Infinity };
     const userLimit = planLimits[userDoc.plan] || 1;
 
+    // --- Monthly Limit Reset Logic ---
+    const today = new Date();
+    if (userDoc.lastApplicationDate) {
+      const lastAppDate = new Date(userDoc.lastApplicationDate);
+      if (lastAppDate.getMonth() !== today.getMonth() || lastAppDate.getFullYear() !== today.getFullYear()) {
+        userDoc.applicationsThisMonth = 0;
+      }
+    }
+
     if (userDoc.applicationsThisMonth >= userLimit && userLimit !== Infinity) {
       return res.status(403).json({ 
           error: "Limit_Exceeded",
@@ -26,19 +35,24 @@ router.post("/", async (req, res) => {
       });
     }
 
+    if (!req.body.Application || !req.body.coverLetter) {
+        return res.status(400).json({ error: "Missing Required Fields: Cover letter and Resume (Application) are mandatory." });
+    }
+
     const applicationipdata = new application({
       company: req.body.company,
       category: req.body.category,
       coverLetter: req.body.coverLetter,
+      availability: req.body.availability,
       user: req.body.user,
       Application: req.body.Application,
-      body: req.body.body,
     });
 
     const data = await applicationipdata.save();
     
-    // Increment the limit tracker
+    // Increment the limit tracker and update date
     userDoc.applicationsThisMonth += 1;
+    userDoc.lastApplicationDate = today;
     await userDoc.save();
 
     res.send(data);

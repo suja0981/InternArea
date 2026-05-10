@@ -1,4 +1,3 @@
-import { User, Lock } from "lucide-react";
 import React, { useState } from "react";
 import {
     Briefcase,
@@ -23,9 +22,9 @@ const index = () => {
         aboutJob: "",
         whoCanApply: "",
         perks: "",
-        numberOfOpening: "",
+        Experience: "",
         CTC: "",
-        startDate: "",
+        StartDate: "",
         AdditionalInfo: "",
     });
     const router = useRouter();
@@ -42,7 +41,7 @@ const index = () => {
         e.preventDefault();
         const hasemptyfields = Object.values(formData).some((val) => !val.trim());
         if (hasemptyfields) {
-            toast.error("Please fill in all detials");
+            toast.error("Please fill in all details");
             return;
         }
         try {
@@ -51,11 +50,11 @@ const index = () => {
             const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/job`, formData, {
               headers: { 'x-admin-token': token || '' }
             });
-            toast.success("job posted successfuly");
+            toast.success("Job posted successfully");
             router.push("/adminpanel");
         } catch (error) {
             console.log(error);
-            toast.error("error posting job");
+            toast.error("Error posting job");
         } finally {
             setisloading(false);
         }
@@ -65,7 +64,9 @@ const index = () => {
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="bg-white rounded-lg shadow-sm p-6">
                     <div className="mb-8">
-                        <h1 className="text-2xl font-bold text-gray-900">Post New Job</h1>
+                        <h1 className="text-2xl font-bold text-gray-900">
+                            Post New Job
+                        </h1>
                         <p className="mt-2 text-sm text-gray-600">
                             Create a new job opportunity
                         </p>
@@ -88,7 +89,7 @@ const index = () => {
                                         value={formData.title}
                                         onChange={handleChange}
                                         className="text-black  mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                        placeholder="e.g. Frontend Developer Intern"
+                                        placeholder="e.g. Frontend Developer"
                                     />
                                 </div>
 
@@ -147,7 +148,7 @@ const index = () => {
                             </div>
                         </div>
 
-                        {/* Company & Internship Details */}
+                        {/* Company & Job Details */}
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">
@@ -179,7 +180,7 @@ const index = () => {
                                     onChange={handleChange}
                                     rows={4}
                                     className="text-black mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                    placeholder="Describe the internship role..."
+                                    placeholder="Describe the job role..."
                                 />
                             </div>
                         </div>
@@ -227,17 +228,16 @@ const index = () => {
                                 <label className="block text-sm font-medium text-gray-700">
                                     <div className="flex items-center mb-1">
                                         <Users className="h-4 w-4 mr-1" />
-                                        Number of Openings*
+                                        Experience Required*
                                     </div>
                                 </label>
                                 <input
-                                    type="number"
-                                    name="numberOfOpening"
-                                    value={formData.numberOfOpening}
+                                    type="text"
+                                    name="Experience"
+                                    value={formData.Experience}
                                     onChange={handleChange}
-                                    min="1"
                                     className="text-black mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                    placeholder="e.g. 5"
+                                    placeholder="e.g. 1+ years"
                                 />
                             </div>
 
@@ -254,7 +254,7 @@ const index = () => {
                                     value={formData.CTC}
                                     onChange={handleChange}
                                     className="text-black mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                    placeholder="e.g. ₹10 LPAn"
+                                    placeholder="e.g. ₹10 LPA"
                                 />
                             </div>
 
@@ -267,8 +267,8 @@ const index = () => {
                                 </label>
                                 <input
                                     type="date"
-                                    name="startDate"
-                                    value={formData.startDate}
+                                    name="StartDate"
+                                    value={formData.StartDate}
                                     onChange={handleChange}
                                     className="text-black mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                                 />

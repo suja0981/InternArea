@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Heart, MessageCircle, Send } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Send } from 'lucide-react';
 
-export default function PostCard({ post, currentUid, onUpdate }: { post: any, currentUid: string, onUpdate: () => void }) {
+export default function PostCard({ post, currentUid, currentUserName, onUpdate }: { post: any, currentUid: string, currentUserName?: string, onUpdate: () => void }) {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
   const isLiked = post.likes?.includes(currentUid) || false;
@@ -27,13 +27,25 @@ export default function PostCard({ post, currentUid, onUpdate }: { post: any, cu
     try {
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/public-space/posts/${post._id}/comment`, {
         authorUid: currentUid,
-        authorName: "User", // Should dynamically fetch the real name, but keeping simple for now
+        authorName: currentUserName || 'User',
         text: commentText
       });
       setCommentText("");
       onUpdate();
     } catch (error) {
       console.error("Error commenting", error);
+    }
+  };
+
+  const handleShare = async () => {
+    const shareText = `${post.authorName} on Intern Area: "${post.content}"`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Intern Area Post', text: shareText, url: window.location.href });
+      } catch {}
+    } else {
+      navigator.clipboard.writeText(shareText);
+      alert('Post copied to clipboard!');
     }
   };
 
@@ -80,6 +92,13 @@ export default function PostCard({ post, currentUid, onUpdate }: { post: any, cu
         >
           <MessageCircle size={20} />
           <span>{post.comments?.length || 0} Comments</span>
+        </button>
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-2 text-gray-500 hover:text-green-500 transition ml-auto"
+        >
+          <Share2 size={20} />
+          <span>Share</span>
         </button>
       </div>
 

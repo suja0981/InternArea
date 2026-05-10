@@ -3,11 +3,11 @@ const router = express.Router();
 const Post = require('../models/Post');
 const User = require('../models/User');
 
-// Helper to check if dates are same day
 const isSameDay = (d1, d2) => {
-  return d1.getFullYear() === d2.getFullYear() &&
-    d1.getMonth() === d2.getMonth() &&
-    d1.getDate() === d2.getDate();
+  const options = { timeZone: 'Asia/Kolkata', year: 'numeric', month: 'numeric', day: 'numeric' };
+  const d1Str = new Date(d1).toLocaleString('en-US', options);
+  const d2Str = new Date(d2).toLocaleString('en-US', options);
+  return d1Str === d2Str;
 }
 
 // Get all posts
@@ -32,7 +32,7 @@ router.post('/posts', async (req, res) => {
 
         // Reset post count if it's a new day
         const today = new Date();
-        if (!isSameDay(user.lastPostDate, today)) {
+        if (!user.lastPostDate || !isSameDay(user.lastPostDate, today)) {
             user.postCountToday = 0;
             user.lastPostDate = today;
         }
@@ -41,12 +41,18 @@ router.post('/posts', async (req, res) => {
         let limit = 0;
         if (friendCount === 0) limit = 0;
         else if (friendCount === 1) limit = 1;
-        else if (friendCount >= 2 && friendCount <= 10) limit = 2; // Assuming 2-10 means 2 posts limit
-        else if (friendCount > 10) limit = Infinity;
+        else if (friendCount >= 2 && friendCount <= 10) limit = 2;
+        else limit = Infinity; // > 10 friends: unlimited
+
+        if (limit === 0) {
+            return res.status(403).json({ 
+                error: 'You need at least 1 friend to post. Add friends to unlock posting!' 
+            });
+        }
 
         if (user.postCountToday >= limit && limit !== Infinity) {
             return res.status(403).json({ 
-                error: `Posting limit reached. You have ${friendCount} friend(s), allowing ${limit} post(s) per day.` 
+                error: `Daily limit reached. You have ${friendCount} friend(s), allowing ${limit} post(s) per day. Come back tomorrow or add more friends!` 
             });
         }
 
@@ -74,6 +80,7 @@ router.post('/posts', async (req, res) => {
 router.post('/posts/:id/like', async (req, res) => {
     try {
         const { uid } = req.body;
+        if (!uid) return res.status(400).json({ error: 'UID is required to like a post' });
         const post = await Post.findById(req.params.id);
         if (!post) return res.status(404).json({ error: 'Post not found' });
 
@@ -95,6 +102,8 @@ router.post('/posts/:id/like', async (req, res) => {
 router.post('/posts/:id/comment', async (req, res) => {
     try {
         const { authorUid, authorName, text } = req.body;
+        if (!authorUid) return res.status(400).json({ error: 'Author UID is required' });
+        if (!text || !text.trim()) return res.status(400).json({ error: 'Comment text cannot be empty' });
         const post = await Post.findById(req.params.id);
         if (!post) return res.status(404).json({ error: 'Post not found' });
 

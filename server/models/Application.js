@@ -4,6 +4,7 @@ const ApplicationSchema = new mongoose.Schema({
     company: String,
     category: String,
     coverLetter: String,
+    availability: String,
     user: Object,
     createdAt: {
         type: Date,
@@ -15,6 +16,6 @@ const ApplicationSchema = new mongoose.Schema({
         default: "pending"
     },
     Application: Object,
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model("Application", ApplicationSchema);

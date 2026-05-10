@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const authMiddleware = require('../middleware/authMiddleware');
 
 // Sync user on login
-router.post('/sync', async (req, res) => {
+router.post('/sync', authMiddleware, async (req, res) => {
     try {
-        const { uid, displayName, email, photoURL } = req.body;
+        const uid = req.user.uid;
+        const { displayName, email, photoURL } = req.body;
         if (!uid) return res.status(400).json({ error: 'UID is required' });
 
         let user = await User.findOne({ uid });
@@ -18,6 +20,12 @@ router.post('/sync', async (req, res) => {
             user.photoURL = photoURL || user.photoURL;
             await user.save();
         }
+
+        // 3. Prevent refresh bypass for Chrome OTP
+        if (user.currentOtp && (!user.otpExpiry || new Date() < user.otpExpiry)) {
+            return res.status(403).json({ error: 'Security Verification Required: Pending Chrome OTP.' });
+        }
+
         res.status(200).json(user);
     } catch (error) {
         console.error(error);
@@ -26,9 +34,10 @@ router.post('/sync', async (req, res) => {
 });
 
 // Add a friend (For testing limit increases)
-router.post('/add-friend', async (req, res) => {
+router.post('/add-friend', authMiddleware, async (req, res) => {
     try {
-        const { uid, friendUid } = req.body;
+        const uid = req.user.uid;
+        const { friendUid } = req.body;
         if (!uid || !friendUid) return res.status(400).json({ error: 'UIDs are required' });
         
         if (uid === friendUid) return res.status(400).json({ error: 'Cannot friend yourself' });
@@ -60,8 +69,9 @@ router.get('/:uid', async (req, res) => {
     }
 });
 
-// Get all users (Admin)
-router.get('/', async (req, res) => {
+// Get all users (Admin only)
+const adminAuth = require('../middleware/adminAuth');
+router.get('/', adminAuth, async (req, res) => {
     try {
         const users = await User.find().sort({ createdAt: -1 });
         res.status(200).json(users);

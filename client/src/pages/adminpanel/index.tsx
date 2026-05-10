@@ -33,20 +33,22 @@ const index = () => {
   React.useEffect(() => {
     const fetchStats = async () => {
       try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
+        const headers = token ? { 'x-admin-token': token } : {};
         const [appsRes, jobsRes, internshipsRes, usersRes] = await Promise.all([
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/application`),
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/job`),
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/internship`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`, { headers }),
         ]);
         const [apps, jobs, internships, users] = await Promise.all([
           appsRes.json(), jobsRes.json(), internshipsRes.json(), usersRes.json()
         ]);
         setStats([
-          { label: 'Total Applications', value: apps.length?.toString() || '0', change: 'Live', changeType: 'positive' },
-          { label: 'Active Jobs', value: jobs.length?.toString() || '0', change: 'Live', changeType: 'positive' },
-          { label: 'Active Internships', value: internships.length?.toString() || '0', change: 'Live', changeType: 'positive' },
-          { label: 'Total Users', value: users.length?.toString() || '0', change: 'Live', changeType: 'positive' },
+          { label: 'Total Applications', value: Array.isArray(apps) ? apps.length.toString() : '0', change: 'Live', changeType: 'positive' },
+          { label: 'Active Jobs', value: Array.isArray(jobs) ? jobs.length.toString() : '0', change: 'Live', changeType: 'positive' },
+          { label: 'Active Internships', value: Array.isArray(internships) ? internships.length.toString() : '0', change: 'Live', changeType: 'positive' },
+          { label: 'Total Users', value: Array.isArray(users) ? users.length.toString() : '0', change: 'Live', changeType: 'positive' },
         ]);
       } catch (e) { console.error('Failed to fetch stats', e); }
     };
@@ -101,11 +103,19 @@ const index = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Manage your jobs, internships, and applications
-          </p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Manage your jobs, internships, and applications
+            </p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Logout
+          </button>
         </div>
 
         {/* Stats */}

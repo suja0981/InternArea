@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import { BarChart, Users, FileText, CheckCircle, Clock } from "lucide-react";
 
 const Analytics = () => {
+  const router = useRouter();
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalApplications: 0,
@@ -10,6 +12,11 @@ const Analytics = () => {
     pendingApplications: 0,
   });
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
+    if (!token) router.replace('/adminlogin');
+  }, [router]);
 
   useEffect(() => {
     const fetchAnalytics = async () => {

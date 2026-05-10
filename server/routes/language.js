@@ -15,7 +15,8 @@ router.post('/send-otp', async (req, res) => {
         if (!user) return res.status(404).json({ error: 'User not found' });
 
         const otp = generateOTP();
-        user.currentOtp = otp;
+        user.langOtp = otp;
+        user.otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10-minute expiry
         await user.save();
 
         // Simulate sending email
@@ -39,12 +40,21 @@ router.post('/verify-otp', async (req, res) => {
         const { uid, otp } = req.body;
         const user = await User.findOne({ uid });
 
-        if (!user || user.currentOtp !== otp) {
+        if (!user || user.langOtp !== otp) {
             return res.status(400).json({ error: 'Invalid OTP or expired session.' });
         }
 
+        // Check OTP expiry
+        if (!user.otpExpiry || new Date() > user.otpExpiry) {
+            user.langOtp = undefined;
+            user.otpExpiry = undefined;
+            await user.save();
+            return res.status(400).json({ error: 'OTP has expired. Please request a new one.' });
+        }
+
         // Clear OTP after successful verification
-        user.currentOtp = undefined;
+        user.langOtp = undefined;
+        user.otpExpiry = undefined;
         await user.save();
 
         res.status(200).json({ message: 'OTP verified successfully' });

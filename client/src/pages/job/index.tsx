@@ -113,7 +113,7 @@ const index = () => {
   //     numberOfopning: "1",
   //   },
   // ];
-  const [filteredjob, setfilteredjobs] = useState<any>([]);
+  const [filteredJobs, setFilteredJobs] = useState<any>([]);
   const [isFiltervisible, setisFiltervisible] = useState(false);
   const [filter, setfilters] = useState({
     category: "",
@@ -123,13 +123,13 @@ const index = () => {
     salary: 50,
     experience: "",
   });
-  const [filteredJobs, setjob] = useState<any>([])
+  const [allJobs, setAllJobs] = useState<any>([])
   useEffect(() => {
     const fetchdata = async () => {
       try {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/job`)
-        setjob(res.data)
-        setfilteredjobs(res.data)
+        setAllJobs(res.data)
+        setFilteredJobs(res.data)
       } catch (error) {
         console.log(error)
       }
@@ -137,7 +137,7 @@ const index = () => {
     fetchdata()
   }, [])
   useEffect(() => {
-    const filtered = filteredJobs.filter((job: any) => {
+    const filtered = allJobs.filter((job: any) => {
       const matchesCategory = job.category
         .toLowerCase()
         .includes(filter.category.toLowerCase());
@@ -146,8 +146,8 @@ const index = () => {
         .includes(filter.location.toLowerCase());
       return matchesCategory && matchesLocation;
     });
-    setfilteredjobs(filtered);
-  }, [filter, filteredJobs]);
+    setFilteredJobs(filtered);
+  }, [filter, allJobs]);
   const handlefilterchange = (e: any) => {
     const { name, value, type, checked } = e.target;
     setfilters((prev) => ({
@@ -164,6 +164,7 @@ const index = () => {
       salary: 50,
       experience: "",
     });
+    setFilteredJobs(allJobs);
   };
   return (
     <div className="min-h-screen bg-gray-50">
@@ -254,7 +255,7 @@ const index = () => {
               {/* Stipend Range */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Annula Salary (₹ in lakhs)
+                  Annual Salary (₹ in lakhs)
                 </label>
                 <input
                   type="range"
@@ -285,11 +286,11 @@ const index = () => {
             </div>
             <div className="bg-white p-4 rounded-lg shadow-sm mb-4">
               <p className="text-center font-medium text-black">
-                {filteredjob.length} Jobs found
+                {filteredJobs.length} Jobs found
               </p>
             </div>
             <div className="space-y-4">
-              {filteredjob.map((job: any) => (
+              {filteredJobs.map((job: any) => (
                 <div
                   key={job._id}
                   className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow"
@@ -431,7 +432,7 @@ const index = () => {
               {/* Stipend Range */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Annula Salary (₹ in lakhs)
+                  Annual Salary (₹ in lakhs)
                 </label>
                 <input
                   type="range"

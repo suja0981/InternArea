@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const PasswordReset = require('../models/PasswordReset');
+const { admin, isInitialized } = require('../firebaseAdmin');
 
 // Helper to check if dates are same day
 const isSameDay = (d1, d2) => {
@@ -21,43 +22,73 @@ const generatePassword = (length = 10) => {
 
 router.post('/forgot-password', async (req, res) => {
     try {
-        const { identifier } = req.body;
-        
-        if (!identifier) {
+        const raw = req.body.identifier;
+
+        if (!raw || !raw.trim()) {
             return res.status(400).json({ error: "Email or phone number is required" });
         }
 
-        // Check if a reset request was already made
+        // Normalize: trim whitespace, lowercase for emails
+        const identifier = raw.trim().toLowerCase();
+
+        // Basic format validation: must look like an email or an all-digit phone
+        const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+        const isPhone = /^[0-9]{7,15}$/.test(identifier);
+        if (!isEmail && !isPhone) {
+            return res.status(400).json({ error: "Please enter a valid email address or phone number." });
+        }
+
+        // Check if a reset request was already made today
         let resetRecord = await PasswordReset.findOne({ identifier });
         const today = new Date();
 
         if (resetRecord) {
-            // If the record exists and lastResetDate is today, block the request
             if (isSameDay(resetRecord.lastResetDate, today)) {
                 return res.status(429).json({ 
                     error: "You can use this option only once per day." 
                 });
             }
-            // Update the last reset date to today
             resetRecord.lastResetDate = today;
             await resetRecord.save();
         } else {
-            // Create a new record
-            resetRecord = new PasswordReset({
-                identifier,
-                lastResetDate: today
-            });
+            resetRecord = new PasswordReset({ identifier, lastResetDate: today });
             await resetRecord.save();
         }
 
-        // Generate the strict alphabetic password
-        const newPassword = generatePassword(10);
+        // Generate a 12-character alphabetic-only password (uppercase + lowercase)
+        const newPassword = generatePassword(12);
 
-        // In a real app, you would hash this and save it to the User model
-        // and email it to the user. For this assignment, we return it.
-        res.status(200).json({ 
-            message: "Password reset successfully", 
-            newPassword 
+        // Update password in Firebase Auth
+        if (!isInitialized) {
+            return res.status(500).json({ error: "Firebase Admin is not configured. Cannot update password. Please add serviceAccountKey.json to the server." });
+        }
+
+        try {
+            let userRecord;
+            if (isEmail) {
+                userRecord = await admin.auth().getUserByEmail(identifier);
+            } else {
+                // Ensure phone number has country code for Firebase
+                let phoneStr = identifier.startsWith('+') ? identifier : `+91${identifier}`; // Assuming India default
+                userRecord = await admin.auth().getUserByPhoneNumber(phoneStr);
+            }
+
+            await admin.auth().updateUser(userRecord.uid, {
+                password: newPassword
+            });
+
+        } catch (firebaseErr) {
+            console.error("Firebase Update Error:", firebaseErr);
+            if (firebaseErr.code === 'auth/user-not-found') {
+                 return res.status(404).json({ error: "No account found with this email/phone number." });
+            }
+            return res.status(500).json({ error: "Failed to update password in Firebase." });
+        }
+
+        // Return the new password to the user
+        res.status(200).json({
+            message: "Your new password has been generated and updated successfully. Please log in.",
+            newPassword
         });
 
     } catch (error) {
@@ -83,8 +114,8 @@ router.post('/track-login', async (req, res) => {
         if (deviceType === 'Mobile') {
             const options = { timeZone: 'Asia/Kolkata', hour12: false, hour: 'numeric' };
             const istHour = parseInt(new Date().toLocaleString('en-US', options), 10);
-            // Allow only between 10:00 AM and 1:00 PM (10:00 to 12:59)
-            if (istHour < 10 || istHour > 12) {
+            // Allow only between 10:00 AM and 1:00 PM IST (hours 10, 11, 12)
+            if (istHour < 10 || istHour >= 13) {
                 return res.status(403).json({ error: "Mobile login is only allowed between 10:00 AM and 1:00 PM IST." });
             }
         }
@@ -101,6 +132,7 @@ router.post('/track-login', async (req, res) => {
                 user = new User({ uid, email });
             }
             user.currentOtp = otp;
+            user.otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // expires in 10 minutes
             await user.save();
             
             // Simulate email
@@ -141,7 +173,15 @@ router.post('/verify-login-otp', async (req, res) => {
         const user = await User.findOne({ uid });
 
         if (!user || user.currentOtp !== otp) {
-            return res.status(400).json({ error: 'Invalid or expired OTP.' });
+            return res.status(400).json({ error: 'Invalid OTP.' });
+        }
+
+        // Check OTP expiry
+        if (!user.otpExpiry || new Date() > user.otpExpiry) {
+            user.currentOtp = undefined;
+            user.otpExpiry = undefined;
+            await user.save();
+            return res.status(400).json({ error: 'OTP has expired. Please login again.' });
         }
 
         user.currentOtp = undefined;
@@ -158,9 +198,13 @@ router.post('/verify-login-otp', async (req, res) => {
     }
 });
 
-// Fetch Login History
+// Fetch Login History (user can only fetch their own)
 router.get('/history/:uid', async (req, res) => {
     try {
+        const requestingUid = req.headers['x-requesting-uid'];
+        if (!requestingUid || requestingUid !== req.params.uid) {
+            return res.status(403).json({ error: 'Forbidden: You can only view your own login history.' });
+        }
         const history = await LoginHistory.find({ uid: req.params.uid }).sort({ createdAt: -1 }).limit(10);
         res.status(200).json(history);
     } catch (error) {

@@ -24,7 +24,9 @@ const index = () => {
     const fetchHistory = async () => {
       if (user?.uid) {
         try {
-          const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/history/${user.uid}`);
+          const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/history/${user.uid}`, {
+            headers: { 'x-requesting-uid': user.uid }
+          });
           setLoginHistory(res.data);
         } catch (error) {
           console.error("Failed to fetch login history", error);
